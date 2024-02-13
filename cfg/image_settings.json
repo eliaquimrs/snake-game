@@ -1,0 +1,74 @@
+{
+	"menu": [
+		{
+			"_name": "logo",
+			"_type": "static",
+			"modes": [],
+			"options": {},
+			"path": [
+				"images",
+				"tittle.png"
+			]
+		},
+		{
+			"_name": "start_game",
+			"_type": "button",
+			"modes": ["selectable", "clickable"],
+			"options": {
+				"selectable": {
+					"actions": ["change_image", "change_cursor"],
+					"path": [
+						"images",
+						"start_button_selected.png"
+					],
+					"cursor": "pygame.SYSTEM_CURSOR_HAND"
+				},
+				"clickable": {
+					"actions": ["change_cursor", "open_new_window"],
+					"window_name": "GameScreen",
+					"cursor": "pygame.SYSTEM_CURSOR_WAIT"
+				}
+			},
+			"path": [
+				"images",
+				"start_button_unselected.png"
+			]
+		},
+		{
+			"_name": "game_settings",
+			"_type": "button",
+			"modes": ["selectable", "clickable"],
+			"options": {
+				"selectable": {
+					"actions": ["change_image", "change_cursor"],
+					"path": [
+						"images",
+						"settings_button_selected.png"
+					],
+					"cursor": "pygame.SYSTEM_CURSOR_HAND"
+				},
+				"clickable": {
+					"actions": ["change_cursor", "open_new_window"],
+					"window_name": "GameSettingScreen",
+					"cursor": "pygame.SYSTEM_CURSOR_WAIT"
+				}
+			},
+			"path": [
+				"images",
+				"settings_button_unselected.png"
+			]
+		},
+		{
+			"_name": "exit",
+			"_type": "button",
+			"options": {},
+			"modes": ["selectable", "clickable"],
+			"path": [
+				"images",
+				"start_button_unselected.png"
+			]
+		}
+	],
+  	"game_setting": [],
+	"game": []
+}
