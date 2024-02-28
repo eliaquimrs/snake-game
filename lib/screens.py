@@ -1,8 +1,9 @@
 from collections import OrderedDict
 import pygame
 
-from utils import ImageObj
+from utils import ImageObj, get_project_path
 from constants import *
+from os import path
 
 class BaseScreen:
     def __init__(self, surface, img_settings) -> None:
@@ -16,7 +17,7 @@ class BaseScreen:
             __image_by_mode={mode: [] for mode in AVAILABLE_IMAGE_MODES}
         )
 
-        for img_item in self.image_settings:
+        for img_item in self.image_settings['images']:
             if 'path' in img_item:
                 name = img_item['_name']
                 img_params = {
@@ -65,7 +66,7 @@ class BaseScreen:
 
     def act_change_cursor(self, options, _, select, mode):
         if select:
-            pygame.mouse.set_cursor(eval(options['cursor']))
+            pygame.mouse.set_cursor(eval(options['cursor'], {'pygame': pygame}, {}))
         else:
             # TODO: configure a CONSTANT FOR DEFAULT CURSOR
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
@@ -131,14 +132,89 @@ class BaseScreen:
             return False, {'method': 'quit'}
 
         return True, ''
+    
+    def clean_all_selected_objects(self):
+        for obj in self.get_all_selectable_objects():
+            if obj.is_selected():
+                obj.invert_select_state()
+                if 'change_image' in obj.get_actions_for_mode(SELECTABLE_MODE):
+                    obj.change_image('default', self.display_surface)
 
 class GameSettingScreen(BaseScreen):
     def configure_screen(self,):
-        pass
+        save_button = self.img_objects['save']
+        reset_settings_button = self.img_objects['reset_settings']
+        check_box =  self.img_objects['check_box']
+
+        
+        img_width = save_button.get_width()
+        img_height = save_button.get_height()
+        
+        surface_w = self.display_surface.get_width()
+        surface_h = self.display_surface.get_height()
+
+        y = surface_h - img_height - 2
+
+        save_button.put_img_on_screen(self.display_surface, (surface_w - img_width - 2, y))
+
+        r_w = reset_settings_button.get_width()
+        reset_settings_button.put_img_on_screen(self.display_surface, (save_button.start_x - r_w - 2, y))
+
+        self.x_center = self._get_x_center_for_img(check_box)
+        check_box.put_img_on_screen(self.display_surface, (self.x_center, y))
+        self.y_center = self.display_surface.get_height() / 2
+
 
     def main_loop(self, _clock):
+        project_path = get_project_path()
+
+        image_path = path.join(project_path, 'images', )
+        snake_path = path.join(image_path, 'snake_game')
+        re_image_name = 'snake_skill_2_{}.png'
+        images_loop = [
+            pygame.image.load(path.join(snake_path, re_image_name.format(i))) for i in range(1, 24)
+        ]
+
+
+        snake_block_img_original = pygame.image.load(path.join(snake_path, 'snake_bad_skill_1-1.png'))
+        #snake_block_img = pygame.transform.scale(snake_block_img, (20, 20))
+        #self.display_surface.blit(snake_block_img, (10, 10))
+        idx = 0
+        operator = 1
         running = True
+        count = 0
+
+        oper = 0.125
+
+        wait_f = False
+        waiting = 0
+        BLOCK_SIZE = [18, 18]
         while running:
+            if wait_f:
+                waiting += 1
+                if waiting == 80:
+                    wait_f = False
+                    waiting = 0
+
+            if not wait_f:
+                self.display_surface.fill("white")
+                BLOCK_SIZE[0] += oper
+                BLOCK_SIZE[1] += oper
+                snake_block_img = pygame.transform.scale(snake_block_img_original, tuple(BLOCK_SIZE))
+                self.display_surface.blit(snake_block_img, (100-(BLOCK_SIZE[0]/1.5), 100-(BLOCK_SIZE[0]/1.5)))
+                if BLOCK_SIZE[0] == 26:
+                    wait_f = True
+                    oper = oper * -1
+                elif BLOCK_SIZE[0] == 16:
+                    oper = oper * -1
+            
+
+            count+=1
+            if count % 2 == 0:
+                idx += operator
+                self.display_surface.blit(images_loop[idx], (self.x_center, self.y_center))
+                if idx == len(images_loop) - 1 or idx == 0:
+                    operator = operator * -1
             #print(self.img_objects['logo'].states)
             # poll for events
             # pygame.QUIT event means the user clicked X to close your window
@@ -150,7 +226,7 @@ class GameSettingScreen(BaseScreen):
             pygame.display.update()
 
             # tick the clock to enforce a max framerate
-            _clock.tick(60)  # limits FPS to 60
+            _clock.tick(120)  # limits FPS to 60
         if _action['method'] == 'quit':
             _action = {"method": "open_new_window", "window_name": "MenuScreen"}
         return _action

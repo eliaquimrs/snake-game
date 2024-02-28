@@ -46,8 +46,8 @@ class ImageObj:
         return SELECTED_STATE in self.states
 
     def _load_image_with_pygame(self):
-        img_obj = pygame.image.load(self.img_settings['path'])
-        all_images = {k: pygame.image.load(v['path']) for k, v in self.options.items()
+        img_obj = pygame.image.load(self.img_settings['path']).convert_alpha()
+        all_images = {k: pygame.image.load(v['path']).convert_alpha() for k, v in self.options.items()
                       if 'path' in v}
         all_images['default'] = img_obj
         
